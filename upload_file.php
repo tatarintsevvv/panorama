@@ -158,8 +158,8 @@ if (move_uploaded_file($_FILES['file']['tmp_name'], $uploadfile)) {
             $filename = $html_file['dirname'].'/'.$html_file['basename'];
             $html = file_get_contents($filename);
             try {
-                $crawler = new Crawler();
-                $crawler->addHtmlContent($html);
+                $crawler = new Crawler($html);
+//                $crawler->addHtmlContent($html,"UTF-8");
                 $file_changed = false;
 
 //                $dom = $crawler[0];
