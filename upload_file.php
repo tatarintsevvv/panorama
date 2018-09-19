@@ -107,6 +107,10 @@ function Zip($source, $destination){
 }
 
 $uploaddir = getcwd()."/uploads/";
+// проверка на существование папки uploads, в Windows ругается
+if (!file_exists($uploaddir) ) {
+    mkdir($uploaddir);
+}
 $uploadfile = $uploaddir . basename($_FILES['file']['name']);
 $uploadfile1 = $uploadfile;
 $i = 1;
@@ -114,6 +118,8 @@ while ( file_exists($uploadfile1) ) {
     $uploadfile1 = $uploadfile.'_'.(string)$i;
     $i++;
 }
+
+
 
 
 if (move_uploaded_file($_FILES['file']['tmp_name'], $uploadfile)) {
@@ -146,7 +152,13 @@ if (move_uploaded_file($_FILES['file']['tmp_name'], $uploadfile)) {
                 $path_info['new_name'] = $path_info['new_name'].$new_name_patch;
                 $image_list[] = $path_info;
                 // файл переименовываю
-                rename($path_info['dirname'].'/'.$path_info['basename'], $path_info['dirname'].'/'.$path_info['new_name'].'.'.$path_info['extension']);
+                $new_filename = $path_info['dirname'].'/'.$path_info['new_name'].'.'.$path_info['extension'];
+                if ( strtoupper(substr(php_uname(), 0, 3)) === 'WIN' ) {
+                    $new_filename = iconv('UTF-8', 'WINDOWS-1251', $new_filename);
+                } else if ( strtoupper(substr(php_uname(), 0, 3)) === 'MAC') {
+                    $new_filename = iconv('UTF-8', 'UTF-8-MAC', $new_filename);
+                }
+                rename($path_info['dirname'].'/'.$path_info['basename'], $new_filename);
             }
         }
         
