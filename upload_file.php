@@ -107,6 +107,10 @@ function Zip($source, $destination){
 }
 
 $uploaddir = getcwd()."/uploads/";
+// проверка на существование папки uploads, в Windows ругается
+if (!file_exists($uploaddir) ) {
+    mkdir($uploaddir);
+}
 $uploadfile = $uploaddir . basename($_FILES['file']['name']);
 $uploadfile1 = $uploadfile;
 $i = 1;
@@ -114,6 +118,8 @@ while ( file_exists($uploadfile1) ) {
     $uploadfile1 = $uploadfile.'_'.(string)$i;
     $i++;
 }
+
+
 
 
 if (move_uploaded_file($_FILES['file']['tmp_name'], $uploadfile)) {
@@ -129,7 +135,26 @@ if (move_uploaded_file($_FILES['file']['tmp_name'], $uploadfile)) {
             $unique_foldername = md5(microtime() . rand(0, 9999));
             $folder_to_extract = $uploaddir . $unique_foldername;
         } while (file_exists($folder_to_extract));
-        $zip->extractTo($folder_to_extract);
+
+
+        for ($i=0; $i<$zip->numFiles; $i++) {
+            $zip_filename = $zip->getNameIndex($i);
+            $filenames[] = $zip->getNameIndex ($i, 64);
+            //https://bugs.php.net/bug.php?id=65815
+            $zip->extractTo($folder_to_extract, $zip_filename);
+//            if ($filenames[$i] === mb_convert_encoding(
+//                mb_convert_encoding($filenames[$i], "CP866", "UTF-8"), "UTF-8", "UTF-8, CP866")) ; //nothing to do
+            if ( $filenames[$i] === mb_convert_encoding(
+                mb_convert_encoding($filenames[$i], "UTF-32", "UTF-8"), "UTF-8", "UTF-32")) ; 
+            else {
+                $filenames[$i] = mb_convert_encoding ($filenames[$i],'UTF-8','CP866');
+                rename($folder_to_extract.'/'.$zip_filename, $folder_to_extract.'/'.$filenames[$i]);
+//                $zip->renameName ($zip->getNameIndex($i),$filenames[$i]);
+            }
+            //Don't work:
+            //
+        }
+//        $zip->extractTo($folder_to_extract);
         $zip->close();
         echo "Файл успешно разархивирован. Начат поиск русских символах в именах графических файлов\n<br />";
 
@@ -146,7 +171,15 @@ if (move_uploaded_file($_FILES['file']['tmp_name'], $uploadfile)) {
                 $path_info['new_name'] = $path_info['new_name'].$new_name_patch;
                 $image_list[] = $path_info;
                 // файл переименовываю
-                rename($path_info['dirname'].'/'.$path_info['basename'], $path_info['dirname'].'/'.$path_info['new_name'].'.'.$path_info['extension']);
+                $new_filename = $path_info['dirname'].'/'.$path_info['new_name'].'.'.$path_info['extension'];
+/*
+                if ( strtoupper(substr(php_uname(), 0, 3)) === 'WIN' ) {
+                    $new_filename = iconv('UTF-8', 'WINDOWS-1251', $new_filename);
+                } else if ( strtoupper(substr(php_uname(), 0, 3)) === 'MAC') {
+                    $new_filename = iconv('UTF-8', 'UTF-8-MAC', $new_filename);
+                }
+*/
+                rename($path_info['dirname'].'/'.$path_info['basename'], $new_filename);
             }
         }
         
