@@ -3,9 +3,6 @@
 ini_set('display_errors', 1);
 ini_set('error_reporting', -1);
 
-$database_dsn = 'mysql:host=127.0.0.1;dbname=s1889;charset=utf8';
-$database_user = 's1889';
-$database_password = 'VqSBKfZRf19m';
 
 if (!defined('PROJECT_NAME')) {
 	define('PROJECT_NAME', 'Panorama');
@@ -28,9 +25,7 @@ if (!defined('PROJECT_CORE_PATH')) {
 	define('PROJECT_CORE_PATH', PROJECT_BASE_PATH . 'core/');
 }
 
-if (!defined('PROJECT_MODEL_PATH')) {
-	define('PROJECT_MODEL_PATH', PROJECT_CORE_PATH . 'Model/');
-}
+
 
 if (!defined('PROJECT_TEMPLATES_PATH')) {
 	define('PROJECT_TEMPLATES_PATH', PROJECT_CORE_PATH . 'Templates/');
@@ -56,17 +51,8 @@ if (!defined('PROJECT_FENOM_OPTIONS')) {
 	define('PROJECT_FENOM_OPTIONS', \Fenom::AUTO_RELOAD | \Fenom::FORCE_VERIFY);
 }
 
-if (!defined('PROJECT_LOG_LEVEL')) {
-	define('PROJECT_LOG_LEVEL', \xPDO\xPDO::LOG_LEVEL_INFO);
-}
 
 if (!defined('PROJECT_LOG_TARGET')) {
 	define('PROJECT_LOG_TARGET', 'HTML');
 }
 
-$database_options = array(
-	\xPDO\xPDO::OPT_CACHE_PATH => PROJECT_CACHE_PATH,
-	\xPDO\xPDO::OPT_HYDRATE_FIELDS => true,
-	\xPDO\xPDO::OPT_HYDRATE_RELATED_OBJECTS => true,
-	\xPDO\xPDO::OPT_HYDRATE_ADHOC_FIELDS => true,
-);
