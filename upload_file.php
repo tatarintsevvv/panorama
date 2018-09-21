@@ -61,7 +61,8 @@ if (move_uploaded_file($_FILES['file']['tmp_name'], $uploadfile)) {
 }
 
 // функция переводит русские символы строки в транслит и возвращает результат
-function ru2lat($str) {
+function ru2lat($str)
+{
     $tr = array(
     "А"=>"a", "Б"=>"b", "В"=>"v", "Г"=>"g", "Д"=>"d",
     "Е"=>"e", "Ё"=>"yo", "Ж"=>"zh", "З"=>"z", "И"=>"i", 
@@ -82,8 +83,10 @@ function ru2lat($str) {
 }
 
 // функция рекурсивно ищет в папке $folderName файлы с раширениями, указанными в массиве $extensions
-// и возвращает результат
-function search_file($folderName, $extensions, &$filelist) {
+// информация об отобранных файлах заносится в массив $files
+function search_file($folderName, $extensions)
+{
+    global $filelist;
     // открываем текущую папку 
     $dir = opendir($folderName); 
     // перебираем папку 
@@ -98,7 +101,7 @@ function search_file($folderName, $extensions, &$filelist) {
             } 
             // если папка, то рекурсивно вызываем search_file
             if (is_dir($folderName."/".$file)) {
-                search_file($folderName."/".$file, $extensions, $filelist);
+                search_file($folderName."/".$file, $extensions);
             }
         } 
     }
@@ -107,7 +110,8 @@ function search_file($folderName, $extensions, &$filelist) {
 }
 
 // функция создает архив $destination из папки $source
-function Zip($source, $destination) {
+function Zip($source, $destination)
+{
     if (!extension_loaded('zip') || !file_exists($source)) {
       return false;
     }
@@ -145,7 +149,9 @@ function Zip($source, $destination) {
 }
 
 // функция генерирует уникальное название 
-function createUniqueFolder($dir) {
+function createUniqueFolder($dir)
+{
+    global $unique_foldername;
     $folder_to_extract = $dir;
     do {
         $unique_foldername = md5(microtime() . rand(0, 9999));
@@ -156,7 +162,8 @@ function createUniqueFolder($dir) {
 
 // функция распаковывает архив $zip_archive в папку $folder_to, создавая в ней папку с уникальным 
 // названием и конвертирует 
-function zip_extract_with_conversion($zip_archive, $folder_to, $codepage = "CP866") {
+function zip_extract_with_conversion($zip_archive, $folder_to, $codepage = "CP866")
+{
     $folder_to_extract = "";
     $zip = new ZipArchive;
     $res = $zip->open($zip_archive);
@@ -180,11 +187,13 @@ function zip_extract_with_conversion($zip_archive, $folder_to, $codepage = "CP86
 // функция просматривает в каталоге $folder файлы с расширениями из массива $extensions и проводит транслит
 // для тех из них, в которых есть русские символы,
 // возвращает массив названий файлов (basename, dirname, extension, filename, new_name)
-function convert_rus_to_translit_names($folder, $extensions) {
+function convert_rus_to_translit_names($folder, $extensions)
+{
+    global $filelist;
     $found_files = array();
     $image_list = array();
     $filelist = array();
-    search_file($folder, $extensions, $filelist);
+    search_file($folder, $extensions);
     foreach ($filelist as $path_info) {
         if (preg_match('/[А-Яа-яЁё]+/', $path_info['filename'])) {
             $path_info['new_name'] = ru2lat($path_info['filename']);
@@ -212,8 +221,9 @@ function replace_converted_files_for_links(
     $dom_element = "img",
     $dom_attribute = "src"
 ) {
+    global $filelist;
     $filelist = array();
-    search_file($folder, $extensions, $filelist);
+    search_file($folder, $extensions);
     foreach ($filelist as $html_file) {
         $filename = $html_file['dirname'] . '/' . $html_file['basename'];
         $html = file_get_contents($filename);
@@ -248,7 +258,8 @@ function replace_converted_files_for_links(
 }
 
 // функция создает создает несуществующее имя на основе 
-function generate_non_existing_filename($filename) {
+function generate_non_existing_filename($filename)
+{
     $path_info = pathinfo($filename);
     $new_filename = $filename;
     $i = 1;
